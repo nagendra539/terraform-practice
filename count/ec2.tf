@@ -20,19 +20,14 @@ resource "aws_security_group" "allow_ssh_terraform" {
 }
 
 resource "aws_instance" "terraform" {
+    count = length(var.instance_names)
     ami           = var.ami_id # devops practice
-    instance_type = var.instance_type
+    instance_type = var.Environment == "Prod" ? "t3.medium" : var.instance_type
     vpc_security_group_ids = [aws_security_group.allow_ssh_terraform.id]
-    tags = var.tags
-  
-}
-
-resource "aws_instance" "ansible_server" {
-    ami           = var.ami_id # devops practice
-    instance_type = var.instance_type
-    vpc_security_group_ids = [aws_security_group.allow_ssh_terraform.id]
-    tags = var.tags
-    # lifecycle {
-    #     prevent_destroy = true
-    # }
+    tags = {
+        Name = var.instance_names[count.index]
+        #Environment = var.Environment
+        #tags = var.tags
+    }
+    #tags = var.tags
 }
